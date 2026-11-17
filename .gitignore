@@ -1,0 +1,19 @@
+# Build artifacts
+*.exe
+*.o
+*.obj
+smartspend
+smartspend.exe
+test_runner.exe
+
+# Local data & export files
+data/*.dat
+data/*.csv
+exports/
+tests_output/
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
