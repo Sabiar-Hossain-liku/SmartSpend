@@ -31,6 +31,7 @@
 #include "budget.h"
 #include "chart.h"
 #include "export.h"
+#include "cli.h"
 
 #define CLS_MAIN    "SmartSpendMain"
 #define CLS_CONTENT "SmartSpendContent"
@@ -1168,6 +1169,35 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev,
         addSampleData(&tmp);
         saveTransactions(&tmp);
         freeList(&tmp);
+        return 0;
+    }
+
+    /* Interactive CLI Terminal Mode */
+    if (strstr(lpCmd, "--cli") != NULL) {
+        if (!AttachConsole(ATTACH_PARENT_PROCESS)) {
+            AllocConsole();
+        }
+        freopen("CONIN$", "r", stdin);
+        freopen("CONOUT$", "w", stdout);
+        freopen("CONOUT$", "w", stderr);
+
+        TransactionList txns;
+        BudgetList      budgets;
+        char            categories[MAX_CATEGORIES][MAX_CAT_LEN];
+        int             catCount = 0;
+
+        initList(&txns);
+        budgets.count = 0;
+        loadTransactions(&txns);
+        loadBudgets(&budgets);
+        initCategories(categories, &catCount);
+        collectCategories(&txns, categories, &catCount);
+        applyRecurring(&txns);
+        saveTransactions(&txns);
+
+        runCliMenu(&txns, &budgets, categories, &catCount);
+
+        freeList(&txns);
         return 0;
     }
 

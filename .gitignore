@@ -4,6 +4,7 @@
 *.obj
 smartspend
 smartspend.exe
+smartspend_cli.exe
 test_runner.exe
 
 # Local data & export files
