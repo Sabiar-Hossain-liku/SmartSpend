@@ -346,8 +346,8 @@ static LRESULT CALLBACK ContentWndProc(HWND hwnd, UINT msg,
         int cw = LOWORD(lParam), ch = HIWORD(lParam);
 
         /* Top right action buttons */
-        SetWindowPos(g_app.hBtnAdd,       NULL, cw - 290, 14, 130, 32, SWP_NOZORDER);
-        SetWindowPos(g_app.hBtnDel,       NULL, cw - 150, 14, 130, 32, SWP_NOZORDER);
+        SetWindowPos(g_app.hBtnAdd,       NULL, cw - 300, 14, 130, 32, SWP_NOZORDER);
+        SetWindowPos(g_app.hBtnDel,       NULL, cw - 160, 14, 130, 32, SWP_NOZORDER);
         SetWindowPos(g_app.hBtnSetBudget, NULL, cw - 160, 14, 140, 32, SWP_NOZORDER);
 
         /* ListView on Transactions page with clean margins */
@@ -929,6 +929,11 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg,
             g_app.hContent,(HMENU)IDC_BTN_EXPORTRPT,hInst,NULL);
         SendMessage(g_app.hBtnExportRpt, WM_SETFONT, (WPARAM)g_app.hFontBold, TRUE);
 
+        RECT contentRect;
+        GetClientRect(g_app.hContent, &contentRect);
+        SendMessage(g_app.hContent, WM_SIZE, 0,
+                    MAKELPARAM(contentRect.right, contentRect.bottom));
+
         /* Load Data */
         initList(&g_app.txns);
         g_app.budgets.count = 0;
@@ -1009,7 +1014,11 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg,
         if (idx < 0 || idx >= PAGE_COUNT) break;
 
         int isActive = (idx == g_app.currentPage);
-        COLORREF bgColor = isActive ? CLR_ACCENT : CLR_SIDEBAR;
+        int isPressed = (dis->itemState & ODS_SELECTED) != 0;
+        int isHot = (dis->itemState & ODS_HOTLIGHT) != 0;
+        COLORREF bgColor = isPressed ? CLR_ACCENT_HOV
+                         : (isActive ? CLR_ACCENT
+                             : (isHot ? CLR_SIDEBAR_HOV : CLR_SIDEBAR));
 
         HBRUSH hBr = CreateSolidBrush(bgColor);
         FillRect(dis->hDC, &dis->rcItem, hBr);
@@ -1029,7 +1038,7 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg,
         GetWindowText(dis->hwndItem, btnText, sizeof(btnText));
         SetBkMode(dis->hDC, TRANSPARENT);
         HFONT hOldFont = (HFONT)SelectObject(dis->hDC, isActive ? g_app.hFontBold : g_app.hFontRegular);
-        SetTextColor(dis->hDC, isActive ? CLR_WHITE : RGB(148, 163, 184));
+        SetTextColor(dis->hDC, isActive || isPressed ? CLR_WHITE : RGB(148, 163, 184));
         RECT textRect = dis->rcItem;
         textRect.left += 14;
         DrawText(dis->hDC, btnText, -1, &textRect,
@@ -1045,8 +1054,10 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg,
         if (id >= IDC_NAV_FIRST && id < IDC_NAV_FIRST + PAGE_COUNT) {
             g_app.currentPage = id - IDC_NAV_FIRST;
             updatePageLayout();
-            RECT sideRect = {0, 0, SIDEBAR_W, 10000};
-            InvalidateRect(hwnd, &sideRect, FALSE);
+            for (int i = 0; i < PAGE_COUNT; i++) {
+                InvalidateRect(g_app.hNavBtns[i], NULL, TRUE);
+                UpdateWindow(g_app.hNavBtns[i]);
+            }
             return 0;
         }
 
