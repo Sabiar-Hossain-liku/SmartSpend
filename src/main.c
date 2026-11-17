@@ -1012,7 +1012,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev,
         addSampleData(&tmp);
         saveTransactions(&tmp);
         freeList(&tmp);
-        MessageBox(NULL, "Sample data created in data/", "SmartSpend", MB_OK);
         return 0;
     }
 
