@@ -1056,7 +1056,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev,
     );
     if (!hMain) return 1;
 
-    ShowWindow(hMain, nCmdShow);
+    ShowWindow(hMain, (nCmdShow == SW_HIDE || nCmdShow == 0) ? SW_SHOWNORMAL : nCmdShow);
     UpdateWindow(hMain);
 
     MSG msg;
